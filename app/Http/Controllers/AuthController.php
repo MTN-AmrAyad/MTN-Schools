@@ -34,7 +34,7 @@ class AuthController extends Controller
 
         if (!$token = auth()->attempt($credentials)) {
             return response()->json([
-                "error" => "Unauthorized"
+                "error" => "Email or password is incorrect"
             ], 401);
         }
         // AuthController::getClientProfile();

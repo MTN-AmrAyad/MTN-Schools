@@ -139,7 +139,7 @@ class RoundController extends Controller
     // Get Round by group_id
     public function getChaptersByRound($group_id)
     {
-        $chapters = Round::where('group_id', $group_id)->with('group')->get();
+        $chapters = Round::where('group_id', $group_id)->with('group', 'chapters')->get();
 
         if ($chapters->isEmpty()) {
             return response()->json(['message' => 'No round found for this round'], 404);

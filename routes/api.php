@@ -24,6 +24,10 @@ use App\Http\Controllers\VideoController;
 // Route::middleware("auth:sanctum")->get("/user", function (Request $request) {
 //     return $request->user();
 // });
+
+// Route::fallback(function () {
+//     return response()->json(['message' => 'Endpoint not found.'], 404);
+// });
 Route::group([
     "middleware" => "api",
     "prefix" => "auth"
