@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ChapterController;
+use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\RoundController;
 use App\Http\Controllers\UserMetaController;
 use App\Http\Controllers\VideoController;
@@ -87,3 +89,22 @@ Route::post('/calendars/{id}', [CalendarController::class, 'update']);
 Route::delete('/calendars/{id}', [CalendarController::class, 'destroy']);
 
 /*/////////////////////////////// END OF ROUTE CALENDAR //////////////////////////////////////*/
+// COMMENTS GROUPS
+Route::middleware('auth:api')->group(function () {
+    Route::post('/comments', [CommentsController::class, 'store']);
+    Route::get('/videos/{video_id}/comments', [CommentsController::class, 'index']);
+    Route::get('/comments/{id}', [CommentsController::class, 'show']);
+    Route::delete('/comments/{id}', [CommentsController::class, 'destroy']);
+});
+
+/*/////////////////////////////// END OF ROUTE COMMENTS //////////////////////////////////////*/
+// REACTIONS GROUPS
+Route::group([
+    'middleware' => 'auth:api',
+    'prefix' => 'comments'
+], function () {
+    Route::post('{comment}/reactions', [ReactionController::class, 'store']);
+    Route::delete('{comment}/reactions', [ReactionController::class, 'destroy']);
+});
+
+/*/////////////////////////////// END OF ROUTE REACTIONS //////////////////////////////////////*/

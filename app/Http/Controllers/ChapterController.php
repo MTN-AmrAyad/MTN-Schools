@@ -106,6 +106,15 @@ class ChapterController extends Controller
             return response()->json(['message' => 'No chapters found for this round'], 404);
         }
 
+        // Add the path to video_photo
+        $chapters = $chapters->map(function ($chapter) {
+            $chapter->videos = $chapter->videos->map(function ($video) {
+                $video->video_photo = asset('videos/' . $video->video_photo);
+                return $video;
+            });
+            return $chapter;
+        });
+
         return response()->json($chapters);
     }
 }

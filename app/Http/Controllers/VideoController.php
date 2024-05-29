@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class VideoController extends Controller
 {
-    // Get all videos #done
+    // Get all videos
     public function index()
     {
         $videos = Video::with('chapter')->get();
@@ -26,6 +26,8 @@ class VideoController extends Controller
                 "video_photo" => $video->video_photo ? asset('videos/' . $video->video_photo) : null,
                 "video_link" => $video->video_link,
                 "chapter_id" => $video->chapter_id,
+                "video_desc" => $video->video_desc,
+                "author_name" => $video->author_name,
             ];
         }
         return response()->json([
@@ -34,7 +36,7 @@ class VideoController extends Controller
         ]);
     }
 
-    // Create a new video #done
+    // Create a new video
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -60,6 +62,8 @@ class VideoController extends Controller
             'video_name' => $request->video_name,
             'video_photo' => $photoName,
             'video_link' => $request->video_link,
+            'video_desc' => $request->video_desc,
+            'author_name' => $request->author_name,
         ]);
 
         return response()->json(['message' => 'Video created successfully', 'video' => $video], 201);
@@ -125,6 +129,8 @@ class VideoController extends Controller
             'video_name' => $request->video_name,
             'video_photo' => $photoName,
             'video_link' => $request->video_link,
+            'video_desc' => $request->video_desc,
+            'author_name' => $request->author_name,
         ]);
 
         return response()->json(['message' => 'Video updated successfully', 'video' => $video]);

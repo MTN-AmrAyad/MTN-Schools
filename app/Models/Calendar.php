@@ -9,7 +9,8 @@ class Calendar extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'group_id', 'title', 'start', 'end', 'allDay'
+        'group_id', 'title', 'start', 'end', 'allDay',
+        'event_desc', 'event_img'
     ];
 
     public function group()

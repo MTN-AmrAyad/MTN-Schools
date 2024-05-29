@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Throwable;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -44,6 +46,14 @@ class Handler extends ExceptionHandler
         // Handle RouteNotFoundException LOGIN
         if ($exception instanceof RouteNotFoundException) {
             return response()->json(['message' => 'You are not Login .'], 404);
+        }
+        // Handle RouteNotFoundException Method Not Found
+        if ($exception instanceof MethodNotAllowedHttpException) {
+            return response()->json(['message' => 'Please check Your Method Request .'], 404);
+        }
+        // Handle RouteNotFoundException Relations Not Found
+        if ($exception instanceof RelationNotFoundException) {
+            return response()->json(['message' => $exception], 404);
         }
 
         return parent::render($request, $exception);
