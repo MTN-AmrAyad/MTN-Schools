@@ -22,4 +22,8 @@ class Group extends Model
     {
         return $this->hasMany(Calendar::class);
     }
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }

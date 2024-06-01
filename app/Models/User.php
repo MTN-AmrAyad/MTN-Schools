@@ -38,4 +38,8 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(UserMeta::class);
     }
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class);
+    }
 }

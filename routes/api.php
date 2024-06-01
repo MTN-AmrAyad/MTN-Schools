@@ -9,6 +9,7 @@ use App\Http\Controllers\CommentsController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\RoundController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserMetaController;
 use App\Http\Controllers\VideoController;
 
@@ -108,3 +109,12 @@ Route::group([
 });
 
 /*/////////////////////////////// END OF ROUTE REACTIONS //////////////////////////////////////*/
+// JOIN AND LEAVE  GROUPS
+Route::middleware('auth:api')->group(function () {
+    Route::post('groups/{group}/join', [GroupController::class, 'joinGroup']);
+    Route::post('groups/{group}/leave', [GroupController::class, 'leaveGroup']);
+    Route::get('groups/{groupId}/members', [GroupController::class, 'getGroupMembersWithMeta']);
+    Route::get('user/groups', [UserController::class, 'getUserGroups']);
+});
+
+/*/////////////////////////////// END OF ROUTE JOIN AND LEAVE //////////////////////////////////////*/

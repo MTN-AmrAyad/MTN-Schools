@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+
 
 class GroupController extends Controller
 {
@@ -151,5 +153,73 @@ class GroupController extends Controller
         }
         $group->delete();
         return response()->json(['message' => 'Group deleted successfully']);
+    }
+    //public function to join a group
+    public function joinGroup($groupId)
+    {
+        $user = Auth::user();
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return response()->json(['message' => 'Group not found'], 404);
+        }
+
+        // Check if the user is already in the group
+        if ($user->groups->contains($groupId)) {
+            return response()->json(['message' => 'User already a member of this group'], 400);
+        }
+
+        // Attach the user to the group
+        $user->groups()->attach($group);
+
+        return response()->json(['message' => 'Joined group successfully']);
+    }
+
+    //public function to Leave a group
+    public function leaveGroup($groupId)
+    {
+        $user = Auth::user();
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return response()->json(['message' => 'Group not found'], 404);
+        }
+
+        $user->groups()->detach($group);
+
+        return response()->json(['message' => 'Left group successfully']);
+    }
+    //function to get count of members of a group and the already members
+    public function getGroupMembersWithMeta($groupId)
+    {
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return response()->json(['message' => 'Group not found'], 404);
+        }
+
+        $members = $group->users()->with('userMeta')->get();
+
+        $membersData = $members->map(function ($user) {
+
+            return [
+                'id' => $user->id,
+                'email' => $user->email,
+                'name' => $user->userMeta->name ?? null,
+                'country_code' => $user->userMeta->country_code ?? null,
+                'phone_number' => $user->userMeta->phone_number ?? null,
+                'cover_image' => $user->userMeta->cover_image ? asset('' . $user->userMeta->cover_image) : null,
+                'profile_image' => $user->userMeta->profile_image ? asset('' . $user->userMeta->profile_image) : null,
+                'created_at' => $user->created_at,
+
+            ];
+        });
+
+        $count = $members->count();
+
+        return response()->json([
+            'count' => $count,
+            'members' => $membersData
+        ]);
     }
 }
