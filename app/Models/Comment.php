@@ -33,4 +33,9 @@ class Comment extends Model
     {
         return $this->hasMany(Reaction::class);
     }
+
+    public function userMeta()
+    {
+        return $this->hasOneThrough(UserMeta::class, User::class);
+    }
 }
