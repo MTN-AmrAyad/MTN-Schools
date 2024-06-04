@@ -45,6 +45,7 @@ class CommentsController extends Controller
                 'id' => $comment->id,
                 'comment' => $comment->comment,
                 'user_id' => $comment->user_id,
+                'video_id' => $comment->video_id,
                 'userMeta' => [
                     'name' => $comment->user->userMeta->name,
                     'country_code' => $comment->user->userMeta->country_code,
