@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Video;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
@@ -158,5 +159,100 @@ class VideoController extends Controller
         }
 
         return response()->json($chapters);
+    }
+
+    public function saveVideo($videoId)
+    {
+        $user = Auth::user();
+        $video = Video::find($videoId);
+
+        if (!$video) {
+            return response()->json(['message' => 'Video not found'], 404);
+        }
+
+        // Check if the video is already saved by the user
+        if ($user->savedVideos()->where('video_id', $videoId)->exists()) {
+            return response()->json(['message' => 'Video already saved'], 409);
+        }
+
+        // Attach the video to the user's saved videos
+        $user->savedVideos()->attach($videoId);
+
+        return response()->json(['message' => 'Video saved successfully'], 201);
+    }
+
+    // Get saved videos for the authenticated user
+    public function getSavedVideos()
+    {
+        $user = Auth::user();
+        $savedVideos = $user->savedVideos()->get();
+
+        return response()->json(['saved_videos' => $savedVideos], 200);
+    }
+    public function unsaveVideo($videoId)
+    {
+        $user = Auth::user();
+        $video = Video::find($videoId);
+
+        if (!$video) {
+            return response()->json(['message' => 'Video not found'], 404);
+        }
+
+        // Detach the video from the user's saved videos
+        $user->savedVideos()->detach($videoId);
+
+        return response()->json(['message' => 'Video unsaved successfully']);
+    }
+
+    // Like a video
+    public function likeVideo($videoId)
+    {
+        $user = Auth::user();
+        $video = Video::find($videoId);
+
+        if (!$video) {
+            return response()->json(['message' => 'Video not found'], 404);
+        }
+
+        // Check if the video is already liked by the user
+        if ($user->likedVideos()->where('video_id', $videoId)->exists()) {
+            return response()->json(['message' => 'Video already liked'], 409);
+        }
+
+        // Attach the video to the user's liked videos
+        $user->likedVideos()->attach($videoId);
+
+        return response()->json(['message' => 'Video liked successfully'], 201);
+    }
+
+    // Unlike a video
+    public function unlikeVideo($videoId)
+    {
+        $user = Auth::user();
+        $video = Video::find($videoId);
+
+        if (!$video) {
+            return response()->json(['message' => 'Video not found'], 404);
+        }
+
+        // Detach the video from the user's liked videos
+        $user->likedVideos()->detach($videoId);
+
+        return response()->json(['message' => 'Video unliked successfully'], 200);
+    }
+
+    // Get likes for a specific video
+    public function getVideoLikes($videoId)
+    {
+        $video = Video::with('likes')->find($videoId);
+
+        if (!$video) {
+            return response()->json(['message' => 'Video not found'], 404);
+        }
+
+        return response()->json([
+            'likes' => $video->likes,
+            'likeCount' => $video->likes->count(),
+        ], 200);
     }
 }

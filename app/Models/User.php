@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -41,5 +42,13 @@ class User extends Authenticatable implements JWTSubject
     public function groups()
     {
         return $this->belongsToMany(Group::class);
+    }
+    public function savedVideos()
+    {
+        return $this->belongsToMany(Video::class, 'saved_videos')->withTimestamps();
+    }
+    public function likedVideos(): BelongsToMany
+    {
+        return $this->belongsToMany(Video::class, 'video_likes');
     }
 }

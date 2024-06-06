@@ -81,6 +81,17 @@ Route::post('/videos/{id}', [VideoController::class, 'update']); // Update a vid
 Route::delete('/videos/{id}', [VideoController::class, 'destroy']); // Delete a video
 Route::get('/videos/{chapter_id}/chapters', [VideoController::class, 'getVideosByChapterId']);
 
+
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('videos/{video}/save', [VideoController::class, 'saveVideo']);
+    Route::get('user/saved-videos', [VideoController::class, 'getSavedVideos']);
+    Route::post('videos/{videoId}/unsave', [VideoController::class, 'unsaveVideo']);
+    Route::post('videos/{video}/like', [VideoController::class, 'likeVideo']);
+    Route::post('videos/{video}/unlike', [VideoController::class, 'unlikeVideo']);
+    Route::get('videos/{video}/likes', [VideoController::class, 'getVideoLikes']);
+});
+
 /*/////////////////////////////// END OF ROUTE VIDEOS //////////////////////////////////////*/
 // CALENDAR GROUPS
 Route::get('/groups/{group}/calendars', [CalendarController::class, 'index']);

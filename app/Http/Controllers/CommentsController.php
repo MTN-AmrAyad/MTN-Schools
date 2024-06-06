@@ -46,6 +46,7 @@ class CommentsController extends Controller
                 'comment' => $comment->comment,
                 'user_id' => $comment->user_id,
                 'video_id' => $comment->video_id,
+                'created_at' => $comment->created_at,
                 'userMeta' => [
                     'name' => $comment->user->userMeta->name,
                     'country_code' => $comment->user->userMeta->country_code,
@@ -59,17 +60,34 @@ class CommentsController extends Controller
                         'id' => $reply->id,
                         'comment' => $reply->comment,
                         'user_id' => $reply->user_id,
+                        'parent_id' => $reply->parent_id,
+                        'created_at' => $reply->created_at,
                         'userMeta' => [
                             'name' => $reply->user->userMeta->name,
                             'country_code' => $reply->user->userMeta->country_code,
                             'phone_number' => $reply->user->userMeta->phone_number,
-                            'cover_image' => $reply->user->userMeta->cover_image ? asset('public' . $reply->user->userMeta->cover_image) : null,
-                            'profile_image' => $reply->user->userMeta->profile_image ? asset('public' . $reply->user->userMeta->profile_image) : null,
+                            'cover_image' => $reply->user->userMeta->cover_image ? asset('public/' . $reply->user->userMeta->cover_image) : null,
+                            'profile_image' => $reply->user->userMeta->profile_image ? asset('public/' . $reply->user->userMeta->profile_image) : null,
                             'created_at' => $reply->user->userMeta->created_at,
                         ],
+                        'reactions' => $reply->reactions->map(function ($reactions) {
+                            return [
+                                'id' => $reactions->id,
+                                'user_id' => $reactions->user_id,
+
+                            ];
+                        }),
+                        'reactionCount' => $reply->reactions->count(),
                     ];
                 }),
                 'reactionCount' => $comment->reactions->count(),
+                'reactions' => $comment->reactions->map(function ($reactions) {
+                    return [
+                        'id' => $reactions->id,
+                        'user_id' => $reactions->user_id,
+
+                    ];
+                }),
             ];
         });
 
@@ -102,5 +120,35 @@ class CommentsController extends Controller
         return response()->json([
             "message" => "Comment deleted successfully",
         ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $comment = Comment::find($id);
+        if (!$comment) {
+            return response()->json([
+                "message" => "Comment not found",
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'comment' => 'required|string|max:1000',
+        ])->stopOnFirstFailure();;
+
+        if ($validator->fails()) {
+            // Get the first error message
+            $firstError = $validator->errors()->first();
+            return response()->json(['error' => $firstError], 422);
+        }
+
+        // Update the comment
+        $comment->comment = $request->input('comment');
+        $comment->save();
+
+        // Return the updated comment with a success message
+        return response()->json([
+            "message" => "Comment updated successfully",
+            "comment" => $comment
+        ], 200);
     }
 }
