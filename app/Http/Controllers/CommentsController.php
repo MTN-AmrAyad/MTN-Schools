@@ -36,8 +36,14 @@ class CommentsController extends Controller
 
     public function index($video_id)
     {
+        // $video = Video::with(['comments' => function ($query) {
+        //     $query->whereNull('parent_id')->with('replies.user.userMeta', 'reactions', 'user.userMeta');
+        // }])->findOrFail($video_id);
+
         $video = Video::with(['comments' => function ($query) {
-            $query->whereNull('parent_id')->with('replies.user.userMeta', 'reactions', 'user.userMeta');
+            $query->whereNull('parent_id')
+                ->orderBy('created_at', 'desc')  // Order comments by created_at in descending order
+                ->with('replies.user.userMeta', 'reactions', 'user.userMeta');
         }])->findOrFail($video_id);
 
         $comments = $video->comments->map(function ($comment) {
