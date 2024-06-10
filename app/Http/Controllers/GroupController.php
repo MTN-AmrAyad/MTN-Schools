@@ -61,6 +61,8 @@ class GroupController extends Controller
             'group_desc' => $request->group_desc,
             'group_cover' => $imageName,
             'group_role' => $request->group_role,
+            'meetingNumber' => $request->meetingNumber,
+            'meetingPassword' => $request->meetingPassword,
         ]);
         if (!$newGroup) {
             return response()->json([

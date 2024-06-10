@@ -14,6 +14,7 @@ class Video extends Model
         'chapter_id', 'video_name',
         'video_photo', 'video_link',
         'video_desc', 'author_name',
+        'video_status',
 
     ];
 

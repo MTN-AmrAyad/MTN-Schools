@@ -11,7 +11,9 @@ class Group extends Model
     protected $fillable = [
         'group_name', 'group_desc',
         'group_cover', 'group_role',
-        'group_status'
+        'meetingNumber', 'meetingPassword',
+        'group_status' // for paid and free
+
     ];
 
     public function rounds()

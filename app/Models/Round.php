@@ -11,6 +11,7 @@ class Round extends Model
     protected $fillable = [
         'group_id', 'round_name',
         'round_desc', 'round_cover',
+        'video_status',
     ];
 
     public function group()

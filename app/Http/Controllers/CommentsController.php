@@ -130,6 +130,7 @@ class CommentsController extends Controller
                 'user_name' => $comment->user->userMeta->name,
                 'profile_image' => $comment->user->userMeta->profile_image ? asset('profiles/' . $comment->user->userMeta->profile_image) : null,
                 'created_at' => $comment->created_at,
+                'reactionCount' => $comment->reactions->count(),
                 'replies' => $comment->replies->map(function ($reply) {
                     return [
                         'id' => $reply->id,
@@ -138,9 +139,13 @@ class CommentsController extends Controller
                         'user_name' => $reply->user->userMeta->name,
                         'profile_image' => $reply->user->userMeta->profile_image ? asset('profiles/' . $reply->user->userMeta->profile_image) : null,
                         'created_at' => $reply->created_at,
+                        'reactions' => $reply->reactions,
+                        'parent_id' => $reply->parent_id,
+                        'reactionCount' => $reply->reactions->count(),
                     ];
                 }),
                 'reactions' => $comment->reactions,
+
             ];
         });
 

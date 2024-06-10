@@ -99,6 +99,7 @@ Route::post('/groups/{group}/calendars', [CalendarController::class, 'store']);
 Route::get('/calendars/{id}', [CalendarController::class, 'show']);
 Route::post('/calendars/{id}', [CalendarController::class, 'update']);
 Route::delete('/calendars/{id}', [CalendarController::class, 'destroy']);
+Route::get('/getZoomMeeting/{id}', [CalendarController::class, 'getMeetingZoom']);
 
 /*/////////////////////////////// END OF ROUTE CALENDAR //////////////////////////////////////*/
 // COMMENTS GROUPS

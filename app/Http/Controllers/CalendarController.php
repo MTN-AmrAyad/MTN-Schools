@@ -73,6 +73,7 @@ class CalendarController extends Controller
             ], 422);
         }
 
+
         return response()->json([
             'id' => $calendar->id,
             'title' => $calendar->title,
@@ -80,6 +81,7 @@ class CalendarController extends Controller
             'end' => $calendar->end,
             'allDay' => $calendar->allDay,
             'event_desc' => $calendar->event_desc,
+            'group_id' => $calendar->group_id,
             'event_img' => asset('events/' . $calendar->event_img),
         ]);
     }
@@ -150,5 +152,22 @@ class CalendarController extends Controller
         $calendar->delete();
 
         return response()->json(['message' => 'Event deleted successfully']);
+    }
+
+    //get zoom meeting auth for each event in the each group
+    public function getMeetingZoom($id)
+    {
+        $calendar = Calendar::find($id);
+        if (!$calendar) {
+            return response()->json([
+                "message" => "ID not found",
+            ], 422);
+        }
+        $zoomMeeting = Group::where('id', $calendar->group_id)->first();
+
+        return response()->json([
+            "meetingNumber" => $zoomMeeting->meetingNumber,
+            "meetingPassword" => $zoomMeeting->meetingPassword,
+        ]);
     }
 }

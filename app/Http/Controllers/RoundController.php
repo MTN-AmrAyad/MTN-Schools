@@ -22,9 +22,9 @@ class RoundController extends Controller
         foreach ($rounds as $round) {
             $data[] = [
                 "id" => $round->id,
-                "group_name" => $round->round_name,
-                "group_desc" => $round->round_desc,
-                "group_cover" => asset('rounds/' . $round->round_cover),
+                "round_name" => $round->round_name,
+                "round_desc" => $round->round_desc,
+                "round_cover" => asset('rounds/' . $round->round_cover),
                 "group_id" => $round->group_id,
             ];
         }
