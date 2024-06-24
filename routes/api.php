@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AcceptPaymentGroupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\RoundController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserMetaController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\ProgressController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,7 +60,8 @@ Route::post('/rounds', [RoundController::class, 'store']); // Create a new round
 Route::get('/rounds/{id}', [RoundController::class, 'show']); // Get one round
 Route::post('/rounds/{id}', [RoundController::class, 'update']); // Update a round
 Route::delete('/rounds/{id}', [RoundController::class, 'destroy']); // Delete a round
-Route::get('/rounds/{group_id}/groups', [RoundController::class, 'getChaptersByRound']);
+// Route::get('/rounds/{group_id}/groups', [RoundController::class, 'getChaptersByRound']);
+Route::get('/rounds/{group_id}/groups', [RoundController::class, 'getChaptersByRoundtwo'])->middleware('auth:api');
 
 /*/////////////////////////////// END OF ROUTE ROUNDS //////////////////////////////////////*/
 
@@ -69,7 +72,7 @@ Route::post('/chapters', [ChapterController::class, 'store']); // Create a new c
 Route::get('/chapters/{id}', [ChapterController::class, 'show']); // Get one chapter
 Route::post('/chapters/{id}', [ChapterController::class, 'update']); // Update a chapter
 Route::delete('/chapters/{id}', [ChapterController::class, 'destroy']); // Delete a chapter
-Route::get('/rounds/{round_id}/chapters', [ChapterController::class, 'getChaptersByRound']);
+Route::get('/rounds/{round_id}/chapters', [ChapterController::class, 'getChaptersByRound'])->middleware('auth:api');
 
 
 /*/////////////////////////////// END OF ROUTE CHAPTERS //////////////////////////////////////*/
@@ -79,7 +82,7 @@ Route::post('/videos', [VideoController::class, 'store']); // Create a new video
 Route::get('/videos/{id}', [VideoController::class, 'show']); // Get one video
 Route::post('/videos/{id}', [VideoController::class, 'update']); // Update a video
 Route::delete('/videos/{id}', [VideoController::class, 'destroy']); // Delete a video
-Route::get('/videos/{chapter_id}/chapters', [VideoController::class, 'getVideosByChapterId']);
+Route::get('/videos/{chapter_id}/chapters', [VideoController::class, 'getVideosByChapterId'])->middleware('auth:api');
 
 
 
@@ -130,3 +133,22 @@ Route::middleware('auth:api')->group(function () {
 });
 
 /*/////////////////////////////// END OF ROUTE JOIN AND LEAVE //////////////////////////////////////*/
+// PAYMENTS GATEWAY
+Route::middleware('auth:api')->group(function () {
+    Route::post('paymentGatway', [AcceptPaymentGroupController::class, 'store']);
+    Route::post('check-subscribtion', [AcceptPaymentGroupController::class, 'checkSubscription']);
+    Route::post('renew-subscribtion', [AcceptPaymentGroupController::class, 'renewSubscription']);
+    Route::post('delete-subscribtion', [AcceptPaymentGroupController::class, 'delete']);
+});
+
+/*/////////////////////////////// END OF ROUTE PAYMENTS GATEWAY //////////////////////////////////////*/
+Route::middleware('auth:api')->group(function () {
+    Route::post('/progress/complete-video', [ProgressController::class, 'completeVideo']);
+    Route::get('/progress/check', [ProgressController::class, 'checkProgress']);
+    Route::get('/progress/completion-percentage', [ProgressController::class, 'completionPercentage']);
+});
+Route::middleware('auth:api')->group(function () {
+    Route::post('/video/{video_id}/complete', [ProgressController::class, 'completeVideo']);
+    Route::get('/progress/{user_id}/{group_id}', [ProgressController::class, 'getProgress']);
+    Route::post('/getLockVideo', [ProgressController::class, 'availableVideo']);
+});

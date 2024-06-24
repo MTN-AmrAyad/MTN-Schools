@@ -23,4 +23,8 @@ class Round extends Model
     {
         return $this->hasMany(Chapter::class);
     }
+    public function userProgress()
+    {
+        return $this->hasMany(UserProgress::class);
+    }
 }

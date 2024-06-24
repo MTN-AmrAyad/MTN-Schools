@@ -30,6 +30,7 @@ class GroupController extends Controller
                 "group_desc" => $group->group_desc,
                 "group_cover" => asset('group/' . $group->group_cover),
                 "group_role" => $group->group_role,
+                "price" => $group->price,
             ];
         }
         return response()->json([
@@ -44,7 +45,8 @@ class GroupController extends Controller
             "group_name" => "required|string|unique:groups,group_name",
             "group_desc" => "required|string",
             'group_cover' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'group_role' => 'required'
+            'group_role' => 'required',
+            'price' => 'required'
         ])->stopOnFirstFailure();;
 
         if ($validator->fails()) {
@@ -63,6 +65,7 @@ class GroupController extends Controller
             'group_role' => $request->group_role,
             'meetingNumber' => $request->meetingNumber,
             'meetingPassword' => $request->meetingPassword,
+            'price' => $request->price,
         ]);
         if (!$newGroup) {
             return response()->json([
@@ -90,6 +93,7 @@ class GroupController extends Controller
                 "group_desc" => $group->group_desc,
                 "group_cover" =>  asset('group/' . $group->group_cover),
                 "group_role" => $group->group_role,
+                "price" => $group->price,
             ]
 
         ], 201);
@@ -134,6 +138,7 @@ class GroupController extends Controller
             'group_desc' => $request->group_desc,
             'group_cover' => $imageName,
             'group_role' => $request->group_role,
+            'price' => $request->price,
         ]);
 
         return response()->json([

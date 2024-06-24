@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserProgress;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -150,16 +151,75 @@ class VideoController extends Controller
     }
 
     // Get Round by group_id
-    public function getVideosByChapterId($chapter_id)
-    {
-        $chapters = Video::where('chapter_id', $chapter_id)->with('chapter')->get();
+    // public function getVideosByChapterId($chapter_id)
+    // {
+    //     $chapters = Video::where('chapter_id', $chapter_id)->with('chapter')->get();
 
-        if ($chapters->isEmpty()) {
+    //     if ($chapters->isEmpty()) {
+    //         return response()->json(['message' => 'No video found for this chapter'], 404);
+    //     }
+    //     $videos = $chapters->map(function ($chapter) {
+    //         return [
+    //             'id' => $chapter->id,
+    //             'chapter_id' => $chapter->chapter_id,
+    //             'video_name' => $chapter->video_name,
+    //             'video_photo' => $chapter->video_photo,
+    //             'video_link' => $chapter->video_link,
+    //             'created_at' => $chapter->created_at,
+    //             'updated_at' => $chapter->updated_at,
+    //             'video_desc' => $chapter->video_desc,
+    //             'author_name' => $chapter->author_name,
+    //             'chapter' => [
+    //                 'id' => $chapter->chapter->id,
+    //                 'round_id' => $chapter->chapter->round_id,
+    //                 'chapter_name' => $chapter->chapter->chapter_name,
+    //                 'created_at' => $chapter->chapter->created_at,
+    //                 'updated_at' => $chapter->chapter->updated_at,
+    //             ],
+    //         ];
+    //     });
+
+    //     return response()->json($videos);
+    // }
+
+    public function getVideosByChapterId(Request $request, $chapter_id)
+    {
+        $user = auth()->user();
+        $videos = Video::where('chapter_id', $chapter_id)->with('chapter')->get();
+
+        if ($videos->isEmpty()) {
             return response()->json(['message' => 'No video found for this chapter'], 404);
         }
 
-        return response()->json($chapters);
+        // Get all user progress for the current user
+        $userProgress = UserProgress::where('user_id', $user->id)->get()->keyBy('video_id');
+
+        // Transform the videos data to the desired format
+        $videos = $videos->map(function ($video) use ($userProgress) {
+            return [
+                'id' => $video->id,
+                'chapter_id' => $video->chapter_id,
+                'video_name' => $video->video_name,
+                'video_photo' => $video->video_photo,
+                'video_link' => $video->video_link,
+                'created_at' => $video->created_at,
+                'updated_at' => $video->updated_at,
+                'video_desc' => $video->video_desc,
+                'author_name' => $video->author_name,
+                'is_locked' => !$userProgress->has($video->id),
+                'chapter' => [
+                    'id' => $video->chapter->id,
+                    'round_id' => $video->chapter->round_id,
+                    'chapter_name' => $video->chapter->chapter_name,
+                    'created_at' => $video->chapter->created_at,
+                    'updated_at' => $video->chapter->updated_at,
+                ],
+            ];
+        });
+
+        return response()->json($videos);
     }
+
 
     public function saveVideo($videoId)
     {

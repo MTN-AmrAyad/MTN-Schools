@@ -39,4 +39,8 @@ class Video extends Model
     {
         return $this->belongsToMany(User::class, 'video_likes');
     }
+    public function userProgress()
+    {
+        return $this->hasMany(UserProgress::class);
+    }
 }

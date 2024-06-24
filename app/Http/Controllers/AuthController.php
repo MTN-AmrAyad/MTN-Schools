@@ -27,19 +27,48 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login()
-    {
 
-        $credentials = request(["email", "password"]);
+    // public function login()
+    // {
+
+    //     $credentials = request(["email", "password"]);
+
+    //     if (!$token = auth()->attempt($credentials)) {
+    //         return response()->json([
+    //             "error" => "Email or password is incorrect"
+    //         ], 401);
+    //     }
+    //     // AuthController::getClientProfile();
+    //     return $this->respondWithToken($token); # If all credentials are correct - we are going to generate a new access token and send it back on response
+    //     # If all credentials are correct - we are going to generate a new access token and send it back on response
+    // }
+    public function login(Request $request)
+    {
+        $credentials = $request->only(['email', 'password']);
 
         if (!$token = auth()->attempt($credentials)) {
             return response()->json([
                 "error" => "Email or password is incorrect"
             ], 401);
         }
-        // AuthController::getClientProfile();
-        return $this->respondWithToken($token); # If all credentials are correct - we are going to generate a new access token and send it back on response
-        # If all credentials are correct - we are going to generate a new access token and send it back on response
+
+        // Retrieve user with userMeta
+        $user = auth()->user()->load('userMeta');
+
+        // Custom claims to include userMeta in the JWT token
+        $customClaims = [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'userMeta' => $user->userMeta
+            ]
+        ];
+
+        // Generate the token with custom claims
+        $token = auth()->claims($customClaims)->attempt($credentials);
+
+        return $this->respondWithToken($token);
     }
 
     /**

@@ -110,53 +110,130 @@ class CommentsController extends Controller
     //         "data" => $comments
     //     ]);
     // }
-    public function index($video_id)
+    // public function index($video_id)
+    // {
+    //     $video = Video::findOrFail($video_id);
+
+    //     // Paginate the comments with eager loading for replies, reactions, and user metadata
+    //     $comments = Comment::where('video_id', $video_id)
+    //         ->whereNull('parent_id')
+    //         ->orderBy('created_at', 'desc')
+    //         ->with(['replies.user.userMeta', 'reactions', 'user.userMeta'])
+    //         ->paginate(2); // Paginate with 5 comments per page
+
+    //     // Transform the paginated comments
+    //     $comments->getCollection()->transform(function ($comment) {
+    //         return [
+    //             'id' => $comment->id,
+    //             'video_id' => $comment->video_id,
+    //             'comment' => $comment->comment,
+    //             'user_id' => $comment->user_id,
+    //             'user_name' => $comment->user->userMeta->name,
+    //             'profile_image' => $comment->user->userMeta->profile_image ? asset('profiles/' . $comment->user->userMeta->profile_image) : null,
+    //             'created_at' => $comment->created_at,
+    //             'reactionCount' => $comment->reactions->count(),
+    //             'replies' => $comment->replies->map(function ($reply) {
+    //                 return [
+    //                     'id' => $reply->id,
+    //                     'video_id' => $reply->video_id,
+    //                     'comment' => $reply->comment,
+    //                     'user_id' => $reply->user_id,
+    //                     'user_name' => $reply->user->userMeta->name,
+    //                     'profile_image' => $reply->user->userMeta->profile_image ? asset('profiles/' . $reply->user->userMeta->profile_image) : null,
+    //                     'created_at' => $reply->created_at,
+    //                     'reactions' => $reply->reactions,
+    //                     'parent_id' => $reply->parent_id,
+    //                     'reactionCount' => $reply->reactions->count(),
+    //                 ];
+    //             }),
+    //             'reactions' => $comment->reactions,
+
+    //         ];
+    //     });
+
+    //     // Get pagination data
+    //     $paginationData = $comments->toArray();
+    //     unset($paginationData['data']); // Remove the actual data to return in a separate key
+
+    //     return response()->json([
+    //         "message" => "Comments retrieved successfully",
+    //         "total_comments" => $comments->total(), // Total count of comments
+    //         "data" => $comments->items(),
+    //         "pagination" => [
+    //             "total" => $paginationData['total'],
+    //             "per_page" => $paginationData['per_page'],
+    //             "current_page" => $paginationData['current_page'],
+    //             "last_page" => $paginationData['last_page'],
+    //             "from" => $paginationData['from'],
+    //             "to" => $paginationData['to'],
+    //             "path" => $paginationData['path'],
+    //             "first_page_url" => $paginationData['first_page_url'],
+    //             "last_page_url" => $paginationData['last_page_url'],
+    //             "next_page_url" => $paginationData['next_page_url'],
+    //             "prev_page_url" => $paginationData['prev_page_url'],
+    //         ],
+    //     ]);
+    // }
+
+    //this is function to paginate the 2 comment with comments and load the new comment with old comments
+    public function index(Request $request, $video_id)
     {
         $video = Video::findOrFail($video_id);
 
-        // Paginate the comments with eager loading for replies, reactions, and user metadata
-        $comments = Comment::where('video_id', $video_id)
-            ->whereNull('parent_id')
-            ->orderBy('created_at', 'desc')
-            ->with(['replies.user.userMeta', 'reactions', 'user.userMeta'])
-            ->paginate(2); // Paginate with 5 comments per page
+        // Get the current page from the request, default to 1 if not set
+        $currentPage = (int) $request->input('page', 1);
 
-        // Transform the paginated comments
-        $comments->getCollection()->transform(function ($comment) {
-            return [
-                'id' => $comment->id,
-                'comment' => $comment->comment,
-                'user_id' => $comment->user_id,
-                'user_name' => $comment->user->userMeta->name,
-                'profile_image' => $comment->user->userMeta->profile_image ? asset('profiles/' . $comment->user->userMeta->profile_image) : null,
-                'created_at' => $comment->created_at,
-                'reactionCount' => $comment->reactions->count(),
-                'replies' => $comment->replies->map(function ($reply) {
-                    return [
-                        'id' => $reply->id,
-                        'comment' => $reply->comment,
-                        'user_id' => $reply->user_id,
-                        'user_name' => $reply->user->userMeta->name,
-                        'profile_image' => $reply->user->userMeta->profile_image ? asset('profiles/' . $reply->user->userMeta->profile_image) : null,
-                        'created_at' => $reply->created_at,
-                        'reactions' => $reply->reactions,
-                        'parent_id' => $reply->parent_id,
-                        'reactionCount' => $reply->reactions->count(),
-                    ];
-                }),
-                'reactions' => $comment->reactions,
+        // If the current page is greater than 1, fetch comments from both page 1 and the current page
+        $commentsPerPage = 2;
+        $pagesToFetch = $currentPage > 1 ? range(1, $currentPage) : [$currentPage];
 
-            ];
-        });
+        $allComments = collect();
 
-        // Get pagination data
+        foreach ($pagesToFetch as $page) {
+            $comments = Comment::where('video_id', $video_id)
+                ->whereNull('parent_id')
+                ->orderBy('created_at', 'asc')
+                ->with(['replies.user.userMeta', 'reactions', 'user.userMeta'])
+                ->paginate($commentsPerPage, ['*'], 'page', $page);
+
+            $transformedComments = $comments->getCollection()->transform(function ($comment) {
+                return [
+                    'id' => $comment->id,
+                    'video_id' => $comment->video_id,
+                    'comment' => $comment->comment,
+                    'user_id' => $comment->user_id,
+                    'user_name' => $comment->user->userMeta->name,
+                    'profile_image' => $comment->user->userMeta->profile_image ? asset('public/' . $comment->user->userMeta->profile_image) : null,
+                    'created_at' => $comment->created_at,
+                    'reactionCount' => $comment->reactions->count(),
+                    'replies' => $comment->replies->map(function ($reply) {
+                        return [
+                            'id' => $reply->id,
+                            'video_id' => $reply->video_id,
+                            'comment' => $reply->comment,
+                            'user_id' => $reply->user_id,
+                            'user_name' => $reply->user->userMeta->name,
+                            'profile_image' => $reply->user->userMeta->profile_image ? asset('public/' . $reply->user->userMeta->profile_image) : null,
+                            'created_at' => $reply->created_at,
+                            'reactions' => $reply->reactions,
+                            'parent_id' => $reply->parent_id,
+                            'reactionCount' => $reply->reactions->count(),
+                        ];
+                    }),
+                    'reactions' => $comment->reactions,
+                ];
+            });
+
+            $allComments = $allComments->merge($transformedComments);
+        }
+
         $paginationData = $comments->toArray();
         unset($paginationData['data']); // Remove the actual data to return in a separate key
 
         return response()->json([
             "message" => "Comments retrieved successfully",
-            "total_comments" => $comments->total(), // Total count of comments
-            "data" => $comments->items(),
+            "total_comments" => $allComments->count(), // Total count of comments
+            "data" => $allComments,
             "pagination" => [
                 "total" => $paginationData['total'],
                 "per_page" => $paginationData['per_page'],

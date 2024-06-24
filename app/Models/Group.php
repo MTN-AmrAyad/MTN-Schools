@@ -12,6 +12,7 @@ class Group extends Model
         'group_name', 'group_desc',
         'group_cover', 'group_role',
         'meetingNumber', 'meetingPassword',
+        'price',
         'group_status' // for paid and free
 
     ];
@@ -27,5 +28,10 @@ class Group extends Model
     public function users()
     {
         return $this->belongsToMany(User::class);
+    }
+
+    public function acceptPaymentGroups()
+    {
+        return $this->hasMany(AcceptPaymentGroup::class);
     }
 }

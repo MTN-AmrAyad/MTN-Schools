@@ -51,4 +51,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Video::class, 'video_likes');
     }
+    public function acceptPaymentGroups()
+    {
+        return $this->hasMany(AcceptPaymentGroup::class);
+    }
+    public function progress()
+    {
+        return $this->hasMany(UserProgress::class);
+    }
 }
