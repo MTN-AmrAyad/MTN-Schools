@@ -34,4 +34,8 @@ class Group extends Model
     {
         return $this->hasMany(AcceptPaymentGroup::class);
     }
+    public function images()
+    {
+        return $this->hasMany(GroupImage::class);
+    }
 }

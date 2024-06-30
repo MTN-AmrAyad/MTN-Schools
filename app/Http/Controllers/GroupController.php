@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\GroupImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
@@ -67,6 +68,21 @@ class GroupController extends Controller
             'meetingPassword' => $request->meetingPassword,
             'price' => $request->price,
         ]);
+        // Handle file upload
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                // Generate a unique name for each image
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                // Move the image to the public/groupsImage directory
+                $image->move(public_path('groupsImage'), $imageName);
+                // Store the image path in the database
+                GroupImage::create([
+                    'group_id' => $newGroup->id,
+                    'image_path' => 'groupsImage/' . $imageName,
+                ]);
+            }
+        }
+
         if (!$newGroup) {
             return response()->json([
                 "message" => "Faild to create group"
@@ -79,7 +95,7 @@ class GroupController extends Controller
     //function to get One Group from a Group table
     public function show($id)
     {
-        $group =  Group::find($id);
+        $group =  Group::with('images', 'users.userMeta')->find($id);
         if (!$group) {
             return response()->json([
                 "message" => "This id not found"
@@ -94,6 +110,19 @@ class GroupController extends Controller
                 "group_cover" =>  asset('group/' . $group->group_cover),
                 "group_role" => $group->group_role,
                 "price" => $group->price,
+                "images" => $group->images->map(function ($image) {
+                    return asset($image->image_path);
+                }),
+                "group_members" => $group->users->map(function ($user) {
+                    return [
+                        "id" => $user->id,
+                        "email" => $user->email,
+                        "name" => $user->userMeta->name,
+                        "image" => asset('public/' . $user->userMeta->profile_image),
+
+                    ];
+                }),
+
             ]
 
         ], 201);

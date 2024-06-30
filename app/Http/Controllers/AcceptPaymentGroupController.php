@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\AcceptPaymentGroup;
 use App\Models\Group;
+use App\Models\GroupUser;
 use App\Models\Round;
 use App\Models\UserProgress;
 use App\Models\Video;
@@ -70,7 +71,12 @@ class AcceptPaymentGroupController extends Controller
                 'group_id' => $groupId,
                 'status' => 'paid', // Assuming default status is paid when created
             ]);
-            
+
+            GroupUser::create([
+                "user_id" => $userId,
+                "group_id" => $groupId
+            ]);
+
 
             $rounds = Round::where('group_id', $request->group_id)->with('chapters')->first();
             $round_id = $rounds->id;
