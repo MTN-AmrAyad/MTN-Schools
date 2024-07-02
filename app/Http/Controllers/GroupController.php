@@ -99,7 +99,7 @@ class GroupController extends Controller
         if (!$group) {
             return response()->json([
                 "message" => "This id not found"
-            ], 403);
+            ], 400);
         }
         return response()->json([
             "message" => "data retrieved successfully",

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AcceptPaymentGroup;
 use App\Models\Group;
 use App\Models\GroupUser;
+use App\Models\PaymentHistory;
 use App\Models\Round;
 use App\Models\UserProgress;
 use App\Models\Video;
@@ -60,6 +61,8 @@ class AcceptPaymentGroupController extends Controller
         $userId = Auth::id(); // Get the authenticated user's ID
         $groupId = $request->input('group_id');
 
+        $group = Group::find($groupId);
+
         $check = AcceptPaymentGroup::where('user_id', $userId)
             ->where('group_id', $groupId)
             ->first();
@@ -76,6 +79,15 @@ class AcceptPaymentGroupController extends Controller
                 "user_id" => $userId,
                 "group_id" => $groupId
             ]);
+            $renewalDate = now()->addMonth();
+
+            // PaymentHistory::create([
+            //     "user_id" => $userId,
+            //     "group_id" => $groupId,
+            //     "amount" => $group->price,
+            //     "payment_date" => now(),
+            //     "renewal_date" => $renewalDate,
+            // ]);
 
 
             $rounds = Round::where('group_id', $request->group_id)->with('chapters')->first();
