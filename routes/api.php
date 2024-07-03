@@ -14,6 +14,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserMetaController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostCommentController;
+use App\Http\Controllers\PostReplyController;
+use App\Http\Controllers\PostLikeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -151,4 +155,27 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/video/{video_id}/complete', [ProgressController::class, 'completeVideo']);
     Route::get('/progress/{user_id}/{group_id}', [ProgressController::class, 'getProgress']);
     Route::post('/getLockVideo', [ProgressController::class, 'availableVideo']);
+});
+
+Route::middleware('auth:api')->group(function () {
+    // Post routes
+    Route::get('postsAll', [PostController::class, 'index']);
+    Route::post('posts', [PostController::class, 'store']);
+    Route::get('posts/{id}', [PostController::class, 'show']);
+    Route::post('updatePosts/{id}', [PostController::class, 'update']);
+    Route::post('deletePosts/{id}', [PostController::class, 'destroy']);
+
+    // Comment routes
+    Route::post('posts/{post}/comments', [PostCommentController::class, 'store']);
+    Route::post('comments/{comment}', [PostCommentController::class, 'update']);
+    Route::post('deleteComments/{comment}', [PostCommentController::class, 'destroy']);
+
+    // // Reply routes
+    Route::post('comments/{comment}/replies', [PostReplyController::class, 'store']);
+    Route::post('replies/{reply}', [PostReplyController::class, 'update']);
+    Route::post('deleteReplies/{reply}', [PostReplyController::class, 'destroy']);
+
+    // // Like routes
+    // Route::post('posts/{post}/likes', [PostLikeController::class, 'store']);
+    // Route::delete('posts/{post}/likes', [PostLikeController::class, 'destroy']);
 });
